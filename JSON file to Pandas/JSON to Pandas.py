@@ -7,6 +7,7 @@
 
 import json
 import urllib.request
+import urllib.parse
 import pandas as pd
 
 
@@ -18,16 +19,22 @@ def call_api():
     """
 
     # url = 'https://jsonplaceholder.typicode.com/comments'
-    url = 'https://jsonplaceholder.typicode.com/posts?'
+    url = 'https://jsonplaceholder.typicode.com/posts'
     hdr = {
         'Content-Type': 'application/json',
-        'userId': '1',
     }
+    params = {
+        'userId': '1',
+        # 'id': '2',
+    }
+
+    # Encodes the parameters and appends it to the url
+    query_string = urllib.parse.urlencode(params)
+    url = url + '?' + query_string
 
     # Create the base HTTP request
     response = urllib.request.Request(url)
 
-    # TODO: Add a parameter to filter the data for a specific value
     # Add the headers to the HTTP request
     for header, value in hdr.items():
         response.add_header(header, value)
@@ -42,8 +49,7 @@ def call_api():
 
 
 if __name__ == '__main__':
-
     responseDf = pd.DataFrame(call_api())
     # json_results.to_csv('testing.csv', encoding='utf-8', index=False)
 
-    # print(responseDf)
+    print(responseDf)
