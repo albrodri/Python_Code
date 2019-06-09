@@ -60,10 +60,10 @@ def read_outlook():
 
     # Declare the Excel writer object to write multiple sheets
     with pd.ExcelWriter(fileName) as writer:
-        pd.DataFrame(error_file).to_excel(writer, index=False, sheet_name='parsed_full_email_body')
-
-        pd.DataFrame(emailbody).to_excel(writer, index=False, sheet_name='errors_with_files',
+        pd.DataFrame(emailbody).to_excel(writer, index=False, sheet_name='parsed_full_email_body',
                                          columns=['fileName', 'emailBody'])
+
+        pd.DataFrame(error_file).to_excel(writer, index=False, sheet_name='errors_with_files')
 
 
 def elapsed_time():
