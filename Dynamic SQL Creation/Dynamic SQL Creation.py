@@ -30,16 +30,16 @@ def print_exception(exception):
 
 
 def get_api():
-    url = 'https://jsonplaceholder.typicode.com/photos'
+    # url = 'https://jsonplaceholder.typicode.com/photos'
     # url = 'https://jsonplaceholder.typicode.com/comments'
-    # url = 'https://jsonplaceholder.typicode.com/posts'
+    url = 'https://jsonplaceholder.typicode.com/posts'
     hdr = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                       'Chrome/74.0.3729.169 Safari/537.36',
         'Content-Type': 'application/json',
     }
     params = {
-        # 'postId': '1'
+        'userId': '1'
     }
 
     with requests.Session() as s:
