@@ -6,8 +6,7 @@
 """
 
 import json
-import urllib.request
-import urllib.parse
+import requests
 import pandas as pd
 
 
@@ -18,38 +17,36 @@ def call_api():
     :return: a list that contains the response from the HTTP GET call
     """
 
-    # url = 'https://jsonplaceholder.typicode.com/comments'
-    url = 'https://jsonplaceholder.typicode.com/posts'
-    hdr = {
-        'Content-Type': 'application/json',
-    }
-    params = {
-        'userId': '1',
-        # 'id': '2',
-    }
+    with requests.Session() as session:
+        # url = 'https://jsonplaceholder.typicode.com/comments'
+        url = 'https://jsonplaceholder.typicode.com/posts'
+        hdr = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/74.0.3729.169 Safari/537.36',
+            'Content-Type': 'application/json',
+        }
+        params = {
+            'userId': '1',
+            # 'id': '2',
+        }
 
-    # Encodes the parameters and appends it to the url
-    query_string = urllib.parse.urlencode(params)
-    url = url + '?' + query_string
+        r = session.get(url, headers=hdr, params=params)
+        api_json_response = r.json()
 
-    # Create the base HTTP request
-    response = urllib.request.Request(url)
+        formatted_response = []
 
-    # Add the headers to the HTTP request
-    for header, value in hdr.items():
-        response.add_header(header, value)
+        for counter, value in enumerate(api_json_response):
+            formatted_response.append(value)
 
-    # Make the HTTP request to retrieve the JSON
-    response = urllib.request.urlopen(response)
+            unique_headers = []
+            for item in value:
+                if item not in unique_headers:
+                    item = item + ' varchar(255),'
+                    unique_headers.append(item)
 
-    # Read the response into a list
-    data = json.loads(response.read())
-
-    return data
+        print(unique_headers)
+        # print(formatted_response)
 
 
 if __name__ == '__main__':
-    responseDf = pd.DataFrame(call_api())
-    # json_results.to_csv('testing.csv', encoding='utf-8', index=False)
-
-    print(responseDf)
+    call_api()
