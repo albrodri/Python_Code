@@ -1,0 +1,84 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat May 19 13:17:07 2018
+
+@author: Rodri_000
+"""
+
+import os
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+from datetime import datetime
+
+
+# Global Variables
+os.chdir(os.path.dirname(os.path.abspath(__file__)))  # Sets working directory to folder the script is being run from
+startTime = datetime.now()
+
+
+def main():
+    url = r'https://www.loopnet.com/Listing/10-W-46th-St-New-York-NY/16324075/'
+
+    hdr = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/75.0.3770.142 Safari/537.36',
+    }
+    params = {
+        '': '',
+    }
+
+    with requests.Session() as s:
+        try:
+            r = s.get(url, headers=hdr, params=params)
+
+            content = r.content.decode()
+
+            soup = BeautifulSoup(content, 'lxml')  # Parse the HTML as a string
+            temp_dict = {}  # Declaration to store empty dictionary
+
+            # Returns the first title and sub-title
+            title = soup.find('h1', class_='profile-hero-title').text
+            sub_title = soup.find('h2', class_='profile-hero-sub-title').text
+
+            temp_dict['title'] = title
+            temp_dict['sub_title'] = sub_title
+            temp_dict['url'] = url
+
+            # Returns the feature grid listing out the details of the property
+            table = soup.find('table', class_='property-data featured-grid')
+            rows = table.find_all('tr')
+            for row in rows:
+                cols = row.find_all('td')
+                cols = [x.text.strip() for x in cols]
+
+                temp_dict[cols[0]] = cols[1]
+                temp_dict[cols[2]] = cols[3]
+
+            print(temp_dict)
+
+        except Exception as e:
+            print(e)
+
+
+def elapsed_time():
+    seconds = datetime.now() - startTime
+    seconds = int(seconds.total_seconds())
+
+    days, seconds = divmod(seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+
+    if days > 0:
+        print('Total runtime for this script was %dd %dh %dm %ds' % (days, hours, minutes, seconds))
+    elif hours > 0:
+        print('Total runtime for this script was %dh %dm %ds' % (hours, minutes, seconds))
+    elif minutes > 0:
+        print('Total runtime for this script was %dm %ds' % (minutes, seconds))
+    else:
+        print('\nTotal runtime for this script was %ds' % (seconds,))
+
+
+if __name__ == "__main__":
+    main()
+    elapsed_time()
