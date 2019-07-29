@@ -88,12 +88,12 @@ def get_api():
                 # r = s.get(x, headers=hdr)
                 # body_content = r.content.decode()
 
-                parse_url = re.split(r'/', x)[4:6]
+                # Splits the file so we can isolate the title and listing id
+                listing_id = re.split(r'/', x)[5]
 
                 temp_dict = {
                     'url': x,
-                    'title': parse_url[0],
-                    'listing_id': parse_url[1],
+                    'listing_id': listing_id,
                 }
 
                 temp_list.append(temp_dict)
