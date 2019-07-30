@@ -6,6 +6,7 @@ Created on Sat May 19 13:17:07 2018
 """
 
 import os
+import re
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -18,7 +19,8 @@ startTime = datetime.now()
 
 
 def main():
-    url = r'https://www.loopnet.com/Listing/10-W-46th-St-New-York-NY/16324075/'
+    # url = r'https://www.loopnet.com/Listing/10-W-46th-St-New-York-NY/16324075/'
+    url = r'https://www.loopnet.com/Listing/1717-E-18th-St-Brooklyn-NY/15377964/'
 
     hdr = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -29,36 +31,88 @@ def main():
     }
 
     with requests.Session() as s:
+        r = s.get(url, headers=hdr, params=params)
+
+        content = r.content.decode()
+        temp_dict = {}  # Declaration to store empty dictionary
+        temp_dict['url'] = url
+
+        soup = BeautifulSoup(content, 'lxml')  # Parse the HTML as a string
+
+        # Returns and stores the first title
+        title = soup.find('h1', class_='profile-hero-title').text
+        temp_dict['title'] = title
+
+        # Returns and stores the first sub title
+        sub_title = soup.find('h2', class_='profile-hero-sub-title').text
+        temp_dict['sub_title'] = sub_title
+
+        # Returns and stores the space use
+        space_use = re.search('gtm-listing-space-use=\"(.*)\"', content, re.M).group(1)
+        temp_dict['space_use'] = space_use
+
+        # Returns and stores the listing city
+        address = soup.find('span', class_='inline-block wrap-padding').text.strip()
+        temp_dict['address'] = address
+
+        # Returns and stores the listing city
+        city = re.search('gtm-listing-city=\"(.*)\"', content, re.M).group(1)
+        temp_dict['city'] = city
+
+        # Returns and stores the listing state
+        state = re.search('gtm-listing-state=\"(.*)\"', content, re.M).group(1)
+        temp_dict['state'] = state
+
+        # Returns and stores the zip code
+        zip_code = re.search('gtm-listing-zip=\"(.*)\"', content, re.M).group(1)
+        temp_dict['zip_code'] = zip_code
+
+        # Returns and stores the listing status
+        status = re.search('gtm-listing-status=\"(.*)\"', content, re.M).group(1)
+        temp_dict['status'] = status
+
+        # Returns and stores if the listing is out of date
+        out_of_date = re.search('\"IsListingOutOfDate\":([a-zA-Z].*)},\"', content, re.M).group(1)
+        temp_dict['out_of_date'] = out_of_date
+
+        # Returns and stores the date the listing was created
+        date_created = soup.find('span', text='Date Created:').next_sibling
+        temp_dict['date_created'] = date_created
+
+        # Returns and stores the last modified date
+        modified_date = re.search(r'\"ModifiedDate\":\"([\d\/\d\/\d]{0,10})', content, re.M).group(1)
+        temp_dict['modified_date'] = modified_date
+
+        # Returns the table that lists out the details of the property e.g. price, unit size, etc...
+        table = soup.find('table', class_='property-data featured-grid')
+        rows = table.find_all('tr')
+
+        for x in range(0, len(rows)):  # Iterates through every row within the table
+            column_count = len(rows[x].find_all('td'))  # Stores the number of columns within the row
+            cols = rows[x].find_all('td')  # Returns all of the cells within the row as an object
+
+            for y in range(0, column_count, 2):  # Iterate through the row specifically, each column in steps of 2
+                if len(cols[y].text.strip()) > 1:  # Ensure we do not include blank cells
+                    temp_dict[cols[y].text.strip()] = cols[y + 1].text.strip()  # Store the data in key value pairs
+
+        # Returns and stores the sale notes
         try:
-            r = s.get(url, headers=hdr, params=params)
+            sale_notes = soup.find('div', class_='column-12 sales-notes-text').get_text().strip()
+            temp_dict['sale_notes'] = sale_notes
+        except:
+            temp_dict['sale_notes'] = None
 
-            content = r.content.decode()
+        # Returns and stores the description
+        try:
+            description = soup.find('p', class_='pre-wrap').get_test().strip()
+            temp_dict['description'] = description
+        except:
+            temp_dict['description'] = None
 
-            soup = BeautifulSoup(content, 'lxml')  # Parse the HTML as a string
-            temp_dict = {}  # Declaration to store empty dictionary
+        # print(temp_dict)
 
-            # Returns the first title and sub-title
-            title = soup.find('h1', class_='profile-hero-title').text
-            sub_title = soup.find('h2', class_='profile-hero-sub-title').text
-
-            temp_dict['title'] = title
-            temp_dict['sub_title'] = sub_title
-            temp_dict['url'] = url
-
-            # Returns the feature grid listing out the details of the property
-            table = soup.find('table', class_='property-data featured-grid')
-            rows = table.find_all('tr')
-            for row in rows:
-                cols = row.find_all('td')
-                cols = [x.text.strip() for x in cols]
-
-                temp_dict[cols[0]] = cols[1]
-                temp_dict[cols[2]] = cols[3]
-
-            print(temp_dict)
-
-        except Exception as e:
-            print(e)
+        print(soup.find('div', class_='space-container')
+              .find('div', class_='column-12'))
 
 
 def elapsed_time():
