@@ -45,7 +45,9 @@ def main():
                     'full_path': f'{folder}\{book_name}',
                 })
 
-    pd.DataFrame(file_list).to_excel(f'{date} - book_inventory.xlsx', index=False, sheet_name='library_inventory',
+    pd.DataFrame(file_list).to_excel(f'{date} - book_inventory.xlsx',
+                                     index=False,
+                                     sheet_name='library_inventory',
                                      columns=['name', 'extension', 'full_path'])
 
 
