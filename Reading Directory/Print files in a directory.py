@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    purpose: To get the results from an API call and convert to a pandas data frame
+    purpose: To print out the books within a specific directory.
     author: Alberto Rodriguez
     date: 2019+05+18
 """
@@ -18,9 +18,8 @@ os.chdir(os.path.dirname((os.path.abspath(__file__))))  # Sets the working direc
 
 def main():
     """
-    To make the GET API call
 
-    :return: a list that contains the response from the HTTP GET call
+    :return:
     """
 
     file_list = []
@@ -46,8 +45,7 @@ def main():
                 })
 
     pd.DataFrame(file_list).to_excel(f'{date} - book_inventory.xlsx',
-                                     index=False,
-                                     sheet_name='library_inventory',
+                                     index=False, sheet_name='library_inventory',
                                      columns=['name', 'extension', 'full_path'])
 
 
